@@ -104,7 +104,7 @@ const PM = {
   },
 };
 
-intro("create-shadcn-registry — E2E Test");
+intro("create-test-app — Create a test app with your registry");
 
 const registryFolder = await text({
   message: "Folder with the registry?",

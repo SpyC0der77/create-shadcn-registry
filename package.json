@@ -8,7 +8,7 @@
     "start": "node bin/index.js",
     "add-component": "node bin/add-component.js",
     "remove-component": "node bin/remove-component.js",
-    "test": "node bin/test.js"
+    "create-test-app": "node bin/create-test-app.js"
   },
   "bin": {
     "create-shadcn-registry": "./bin/index.js"

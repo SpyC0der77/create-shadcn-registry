@@ -69,7 +69,7 @@ your-registry/
 
 1. **Add components** — Edit `registry.json` and add component files under `registry/<style>/`.
 2. **Build** — Run `npm run registry:build` (or equivalent) to compile the registry.
-3. **Local testing** — Run the dev server and use the E2E test script (see below).
+3. **Local testing** — Use the create-test-app command (see below).
 4. **Deploy** — Host the built `public/r/` output where your homepage URL points.
 
 Full details: [shadcn Registry Docs](https://ui.shadcn.com/docs/registry)
@@ -81,7 +81,7 @@ Full details: [shadcn Registry Docs](https://ui.shadcn.com/docs/registry)
 | `bun start` | Run the create-shadcn-registry CLI |
 | `bun run add-component` | Add a new component to an existing registry |
 | `bun run remove-component` | Remove a component from the registry |
-| `bun test` | Run E2E test (creates Next app, adds registry components) |
+| `bun run create-test-app` | Create a test Next.js app and add registry components |
 
 ### add-component
 
@@ -118,9 +118,9 @@ You'll be prompted for:
 
 The command deletes the component file(s) and updates `registry.json`.
 
-## Test
+### create-test-app
 
-The test script validates the full flow:
+The create-test-app command validates the full flow:
 
 1. Build your registry
 2. Start a local registry server (tries port 3000, then 3001, 3002, etc. if taken)
@@ -130,7 +130,9 @@ The test script validates the full flow:
 6. Stop the registry server
 
 ```bash
-bun test
+npx create-shadcn-registry create-test-app
+# or
+bun run create-test-app
 ```
 
 You'll be prompted for the registry folder (with `registry.json`) and the target app folder (must be empty).
