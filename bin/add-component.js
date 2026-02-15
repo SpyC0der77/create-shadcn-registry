@@ -167,8 +167,11 @@ const filePath = `registry/${styleName}/ui/${componentName}.tsx`;
 // Default deps for the component template (CVA + cn from utils)
 const DEFAULT_DEPS = ["class-variance-authority"];
 let dependencies = [...DEFAULT_DEPS];
-if (flags.dependencies != null) {
-  const extra = String(flags.dependencies)
+if (
+  typeof flags.dependencies === "string" &&
+  flags.dependencies.trim() !== ""
+) {
+  const extra = flags.dependencies
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean);
