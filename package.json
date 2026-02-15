@@ -7,6 +7,8 @@
   "scripts": {
     "start": "node bin/index.js",
     "add-component": "node bin/add-component.js",
+    "add-hook": "node bin/add-hook.js",
+    "add-block": "node bin/add-block.js",
     "remove-component": "node bin/remove-component.js",
     "create-test-app": "node bin/create-test-app.js"
   },

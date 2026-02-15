@@ -5,6 +5,14 @@ if (subcommand === "add-component") {
   await import("./add-component.js");
   process.exit(0);
 }
+if (subcommand === "add-hook") {
+  await import("./add-hook.js");
+  process.exit(0);
+}
+if (subcommand === "add-block") {
+  await import("./add-block.js");
+  process.exit(0);
+}
 if (subcommand === "remove-component") {
   await import("./remove-component.js");
   process.exit(0);

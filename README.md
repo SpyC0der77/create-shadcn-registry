@@ -87,7 +87,7 @@ your-registry/
 
 ## Next Steps
 
-1. **Add components** — Edit `registry.json` and add component files under `registry/<style>/`.
+1. **Add components, hooks, and blocks** — Use `add-component`, `add-hook`, or `add-block`, or edit `registry.json` and add files under `registry/<style>/`.
 2. **Build** — Run `npm run registry:build` (or equivalent) to compile the registry.
 3. **Local testing** — Use the create-test-app command (see below).
 4. **Deploy** — Host the built `public/r/` output where your homepage URL points.
@@ -100,7 +100,9 @@ Full details: [shadcn Registry Docs](https://ui.shadcn.com/docs/registry)
 |---------|-------------|
 | `bun start` | Run the create-shadcn-registry CLI |
 | `bun run add-component` | Add a new component to an existing registry |
-| `bun run remove-component` | Remove a component from the registry |
+| `bun run add-hook` | Add a new hook to an existing registry |
+| `bun run add-block` | Add a new block to an existing registry |
+| `bun run remove-component` | Remove a component, hook, or block from the registry |
 | `bun run create-test-app` | Create a test Next.js app and add registry components |
 
 ### add-component
@@ -133,6 +135,66 @@ npx create-shadcn-registry add-component --component-name my-component --registr
 | `--style` | `new-york` or `default` |
 | `--dependencies` | Comma-separated npm packages (merged with defaults: `class-variance-authority`) |
 
+### add-hook
+
+Add a standalone React hook to your registry:
+
+```bash
+npx create-shadcn-registry add-hook
+# or
+bun run add-hook
+```
+
+You'll be prompted for:
+
+- **Registry folder** — Path to the folder containing `registry.json`
+- **Hook name** — Use `use-<name>` format (e.g. `use-my-hook`)
+- **Style** — New York or Default
+
+The command creates a hook file at `registry/<style>/hooks/<hook-name>.ts` and updates `registry.json`.
+
+Pass flags to skip prompts:
+```bash
+npx create-shadcn-registry add-hook --hook-name use-my-hook --registry-folder . --style new-york
+```
+
+| Flag | Description |
+|------|-------------|
+| `--hook-name` | Hook name in use-<name> format |
+| `--registry-folder` | Path to registry (default: `.`) |
+| `--style` | `new-york` or `default` |
+| `--dependencies` | Comma-separated npm packages |
+
+### add-block
+
+Add a block (complex component with multiple files) to your registry:
+
+```bash
+npx create-shadcn-registry add-block
+# or
+bun run add-block
+```
+
+You'll be prompted for:
+
+- **Registry folder** — Path to the folder containing `registry.json`
+- **Block name** — kebab-case (e.g. `my-block`)
+- **Style** — New York or Default
+
+The command creates a block folder at `registry/<style>/blocks/<block-name>/` with a component and hook file, and updates `registry.json`.
+
+Pass flags to skip prompts:
+```bash
+npx create-shadcn-registry add-block --block-name my-block --registry-folder . --style new-york
+```
+
+| Flag | Description |
+|------|-------------|
+| `--block-name` | kebab-case block name |
+| `--registry-folder` | Path to registry (default: `.`) |
+| `--style` | `new-york` or `default` |
+| `--dependencies` | Comma-separated npm packages |
+
 ### remove-component
 
 From a registry project (or with the registry folder path), run:
@@ -146,9 +208,9 @@ bun run remove-component
 You'll be prompted for:
 
 - **Registry folder** — Path to the folder containing `registry.json`
-- **Component to remove** — Select from existing components in the registry
+- **Component to remove** — Select from existing components, hooks, or blocks in the registry
 
-The command deletes the component file(s) and updates `registry.json`.
+The command deletes the item's file(s) and updates `registry.json`.
 
 Pass flags to skip prompts:
 ```bash
