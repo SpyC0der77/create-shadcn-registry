@@ -42,7 +42,7 @@ You'll be asked for:
 | Registry name | Identifier for your registry (used as `@name/component`) | `my-ui` |
 | Project location | Folder to create the registry in | `.` or `./my-registry` |
 | Framework | Target framework (Next.js supported) | Next.js |
-| Style | shadcn style variant | New York or Default |
+| Style | Shadcn/UI style variant (Only ShadCN/ui defaults supported) | New York or Default |
 | Homepage | URL where the registry will be hosted | `https://example.com` |
 
 The tool clones the template, applies your choices, and writes a ready-to-use registry.
