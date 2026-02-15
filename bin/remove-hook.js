@@ -26,7 +26,7 @@ function handleCancel(value) {
 
 const { flags } = parseArgs();
 
-intro("remove-component — Remove a component from your registry");
+intro("remove-hook — Remove a hook from your registry");
 
 let registryFolder;
 if (flags["registry-folder"] != null) {
@@ -49,37 +49,35 @@ const registryPath = resolve(process.cwd(), registryFolder);
 const registryJsonPath = join(registryPath, "registry.json");
 const registry = JSON.parse(readFileSync(registryJsonPath, "utf-8"));
 const items = registry.items || [];
-const components = items.filter(
-  (i) => i.type === "registry:ui" || i.type === "registry:component",
-);
+const hooks = items.filter((i) => i.type === "registry:hook");
 
-if (components.length === 0) {
-  cancel("No components in registry.");
+if (hooks.length === 0) {
+  cancel("No hooks in registry.");
   process.exit(1);
 }
 
-let componentName;
-if (flags.component != null) {
-  componentName = flags.component;
-  const found = components.find((i) => i.name === componentName);
+let hookName;
+if (flags.hook != null) {
+  hookName = flags.hook;
+  const found = hooks.find((i) => i.name === hookName);
   if (!found) {
     console.error(
-      `Error: Component "${componentName}" not found. Available: ${components.map((i) => i.name).join(", ")}`,
+      `Error: Hook "${hookName}" not found. Available: ${hooks.map((i) => i.name).join(", ")}`,
     );
     process.exit(1);
   }
 } else {
-  componentName = await select({
-    message: "Which component to remove?",
-    options: components.map((item) => ({
+  hookName = await select({
+    message: "Which hook to remove?",
+    options: hooks.map((item) => ({
       value: item.name,
       label: item.name,
     })),
   });
-  handleCancel(componentName);
+  handleCancel(hookName);
 }
 
-const item = items.find((i) => i.name === componentName);
+const item = items.find((i) => i.name === hookName);
 const files = item?.files || [];
 
 for (const file of files) {
@@ -93,7 +91,7 @@ for (const file of files) {
   }
 }
 
-registry.items = items.filter((i) => i.name !== componentName);
+registry.items = items.filter((i) => i.name !== hookName);
 writeFileSync(registryJsonPath, JSON.stringify(registry, null, 2));
 
-outro(`Removed ${componentName}. Run \`registry:build\` to rebuild.`);
+outro(`Removed ${hookName}. Run \`registry:build\` to rebuild.`);

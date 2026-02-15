@@ -8,12 +8,13 @@ import {
   isCancel,
   cancel,
 } from "@clack/prompts";
-import { resolve, join } from "node:path";
+import { resolve, join, dirname } from "node:path";
 import {
   readFileSync,
   writeFileSync,
   existsSync,
   unlinkSync,
+  rmSync,
 } from "node:fs";
 import { parseArgs } from "./parse-args.js";
 
@@ -26,7 +27,7 @@ function handleCancel(value) {
 
 const { flags } = parseArgs();
 
-intro("remove-component — Remove a component from your registry");
+intro("remove-block — Remove a block from your registry");
 
 let registryFolder;
 if (flags["registry-folder"] != null) {
@@ -49,37 +50,35 @@ const registryPath = resolve(process.cwd(), registryFolder);
 const registryJsonPath = join(registryPath, "registry.json");
 const registry = JSON.parse(readFileSync(registryJsonPath, "utf-8"));
 const items = registry.items || [];
-const components = items.filter(
-  (i) => i.type === "registry:ui" || i.type === "registry:component",
-);
+const blocks = items.filter((i) => i.type === "registry:block");
 
-if (components.length === 0) {
-  cancel("No components in registry.");
+if (blocks.length === 0) {
+  cancel("No blocks in registry.");
   process.exit(1);
 }
 
-let componentName;
-if (flags.component != null) {
-  componentName = flags.component;
-  const found = components.find((i) => i.name === componentName);
+let blockName;
+if (flags.block != null) {
+  blockName = flags.block;
+  const found = blocks.find((i) => i.name === blockName);
   if (!found) {
     console.error(
-      `Error: Component "${componentName}" not found. Available: ${components.map((i) => i.name).join(", ")}`,
+      `Error: Block "${blockName}" not found. Available: ${blocks.map((i) => i.name).join(", ")}`,
     );
     process.exit(1);
   }
 } else {
-  componentName = await select({
-    message: "Which component to remove?",
-    options: components.map((item) => ({
+  blockName = await select({
+    message: "Which block to remove?",
+    options: blocks.map((item) => ({
       value: item.name,
       label: item.name,
     })),
   });
-  handleCancel(componentName);
+  handleCancel(blockName);
 }
 
-const item = items.find((i) => i.name === componentName);
+const item = items.find((i) => i.name === blockName);
 const files = item?.files || [];
 
 for (const file of files) {
@@ -93,7 +92,20 @@ for (const file of files) {
   }
 }
 
-registry.items = items.filter((i) => i.name !== componentName);
+// Recursively delete block directory and all contents (derive path from first file: registry/<style>/blocks/<name>/)
+const firstFile = files[0];
+if (firstFile?.path) {
+  const dir = join(registryPath, dirname(firstFile.path));
+  if (existsSync(dir)) {
+    try {
+      rmSync(dir, { recursive: true });
+    } catch {
+      /* dir may not be empty or already removed */
+    }
+  }
+}
+
+registry.items = items.filter((i) => i.name !== blockName);
 writeFileSync(registryJsonPath, JSON.stringify(registry, null, 2));
 
-outro(`Removed ${componentName}. Run \`registry:build\` to rebuild.`);
+outro(`Removed ${blockName}. Run \`registry:build\` to rebuild.`);
