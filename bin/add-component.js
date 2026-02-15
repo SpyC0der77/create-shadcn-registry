@@ -158,17 +158,6 @@ if (existsSync(componentFilePath)) {
   process.exit(1);
 }
 
-const pascalName = toPascalCase(componentName);
-const slotName = componentName;
-
-const componentContent = COMPONENT_TEMPLATE.replace(
-  /\{\{COMPONENT_NAME\}\}/g,
-  pascalName
-).replace(/\{\{SLOT_NAME\}\}/g, slotName);
-
-mkdirSync(componentDir, { recursive: true });
-writeFileSync(componentFilePath, componentContent);
-
 const filePath = `registry/${styleName}/ui/${componentName}.tsx`;
 
 // Default deps for the component template (CVA + cn from utils)
@@ -199,9 +188,23 @@ const newItem = {
 };
 
 registry.items.push(newItem);
-
 writeFileSync(registryJsonPath, JSON.stringify(registry, null, 2));
 
+try {
+  const pascalName = toPascalCase(componentName);
+  const slotName = componentName;
+  const componentContent = COMPONENT_TEMPLATE.replace(
+    /\{\{COMPONENT_NAME\}\}/g,
+    pascalName,
+  ).replace(/\{\{SLOT_NAME\}\}/g, slotName);
+  mkdirSync(componentDir, { recursive: true });
+  writeFileSync(componentFilePath, componentContent);
+} catch (err) {
+  registry.items = registry.items.filter((i) => i.name !== componentName);
+  writeFileSync(registryJsonPath, JSON.stringify(registry, null, 2));
+  throw err;
+}
+
 outro(
-  `Added ${componentName} at ${filePath}. Run \`registry:build\` to rebuild.`
+  `Added ${componentName} at ${filePath}. Run \`registry:build\` to rebuild.`,
 );

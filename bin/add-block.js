@@ -9,7 +9,14 @@ import {
   cancel,
 } from "@clack/prompts";
 import { resolve, join } from "node:path";
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
+import {
+  readFileSync,
+  writeFileSync,
+  existsSync,
+  mkdirSync,
+  unlinkSync,
+  rmdirSync,
+} from "node:fs";
 import { parseArgs } from "./parse-args.js";
 
 function handleCancel(value) {
@@ -160,21 +167,6 @@ if (existsSync(componentFilePath)) {
   process.exit(1);
 }
 
-const pascalName = toPascalCase(blockName);
-const blockComponentContent = BLOCK_COMPONENT_TEMPLATE.replace(
-  /\{\{BLOCK_PASCAL\}\}/g,
-  pascalName
-).replace(/\{\{BLOCK_NAME\}\}/g, blockName);
-
-const blockHookContent = BLOCK_HOOK_TEMPLATE.replace(
-  /\{\{BLOCK_PASCAL\}\}/g,
-  pascalName
-);
-
-mkdirSync(blockDir, { recursive: true });
-writeFileSync(componentFilePath, blockComponentContent);
-writeFileSync(hookFilePath, blockHookContent);
-
 const componentPath = `registry/${styleName}/blocks/${blockName}/${blockName}.tsx`;
 const hookPath = `registry/${styleName}/blocks/${blockName}/use-${blockName}.ts`;
 
@@ -209,9 +201,36 @@ const newItem = {
 };
 
 registry.items.push(newItem);
-
 writeFileSync(registryJsonPath, JSON.stringify(registry, null, 2));
 
+try {
+  const pascalName = toPascalCase(blockName);
+  const blockComponentContent = BLOCK_COMPONENT_TEMPLATE.replace(
+    /\{\{BLOCK_PASCAL\}\}/g,
+    pascalName,
+  ).replace(/\{\{BLOCK_NAME\}\}/g, blockName);
+
+  const blockHookContent = BLOCK_HOOK_TEMPLATE.replace(
+    /\{\{BLOCK_PASCAL\}\}/g,
+    pascalName,
+  );
+
+  mkdirSync(blockDir, { recursive: true });
+  writeFileSync(componentFilePath, blockComponentContent);
+  writeFileSync(hookFilePath, blockHookContent);
+} catch (err) {
+  if (existsSync(componentFilePath)) unlinkSync(componentFilePath);
+  if (existsSync(hookFilePath)) unlinkSync(hookFilePath);
+  try {
+    if (existsSync(blockDir)) rmdirSync(blockDir);
+  } catch {
+    /* dir may not be empty or already removed */
+  }
+  registry.items = registry.items.filter((i) => i.name !== blockName);
+  writeFileSync(registryJsonPath, JSON.stringify(registry, null, 2));
+  throw err;
+}
+
 outro(
-  `Added block ${blockName} at registry/${styleName}/blocks/${blockName}/. Run \`registry:build\` to rebuild.`
+  `Added block ${blockName} at registry/${styleName}/blocks/${blockName}/. Run \`registry:build\` to rebuild.`,
 );

@@ -131,16 +131,6 @@ if (existsSync(hookFilePath)) {
   process.exit(1);
 }
 
-const hookFunctionName = toHookFunctionName(hookName);
-
-const hookContent = HOOK_TEMPLATE.replace(
-  /\{\{HOOK_NAME\}\}/g,
-  hookFunctionName
-);
-
-mkdirSync(hookDir, { recursive: true });
-writeFileSync(hookFilePath, hookContent);
-
 const filePath = `registry/${styleName}/hooks/${hookName}.ts`;
 
 const DEFAULT_DEPS = [];
@@ -170,7 +160,20 @@ const newItem = {
 };
 
 registry.items.push(newItem);
-
 writeFileSync(registryJsonPath, JSON.stringify(registry, null, 2));
+
+try {
+  const hookFunctionName = toHookFunctionName(hookName);
+  const hookContent = HOOK_TEMPLATE.replace(
+    /\{\{HOOK_NAME\}\}/g,
+    hookFunctionName,
+  );
+  mkdirSync(hookDir, { recursive: true });
+  writeFileSync(hookFilePath, hookContent);
+} catch (err) {
+  registry.items = registry.items.filter((i) => i.name !== hookName);
+  writeFileSync(registryJsonPath, JSON.stringify(registry, null, 2));
+  throw err;
+}
 
 outro(`Added ${hookName} at ${filePath}. Run \`registry:build\` to rebuild.`);
