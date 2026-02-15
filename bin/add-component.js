@@ -134,14 +134,22 @@ if (flags.style != null) {
   handleCancel(styleName);
 }
 
-const regPath = resolve(process.cwd(), registryFolder);
-if (!existsSync(join(regPath, "registry.json"))) {
+const registryPath = resolve(process.cwd(), registryFolder);
+const registryJsonPath = join(registryPath, "registry.json");
+if (!existsSync(registryJsonPath)) {
   console.error("Error: registry.json not found in that folder");
   process.exit(1);
 }
 
-const registryPath = resolve(process.cwd(), registryFolder);
-const registryJsonPath = join(registryPath, "registry.json");
+const registry = JSON.parse(readFileSync(registryJsonPath, "utf-8"));
+registry.items = registry.items || [];
+if (registry.items.some((i) => i.name === componentName)) {
+  console.error(
+    `Error: Component "${componentName}" already exists in registry. Remove it first or choose a different name.`,
+  );
+  process.exit(1);
+}
+
 const componentDir = join(registryPath, "registry", styleName, "ui");
 const componentFilePath = join(componentDir, `${componentName}.tsx`);
 
@@ -161,7 +169,6 @@ const componentContent = COMPONENT_TEMPLATE.replace(
 mkdirSync(componentDir, { recursive: true });
 writeFileSync(componentFilePath, componentContent);
 
-const registry = JSON.parse(readFileSync(registryJsonPath, "utf-8"));
 const filePath = `registry/${styleName}/ui/${componentName}.tsx`;
 
 // Default deps for the component template (CVA + cn from utils)
@@ -191,7 +198,6 @@ const newItem = {
   ],
 };
 
-registry.items = registry.items || [];
 registry.items.push(newItem);
 
 writeFileSync(registryJsonPath, JSON.stringify(registry, null, 2));

@@ -137,14 +137,23 @@ if (flags.style != null) {
 
 const registryPath = resolve(process.cwd(), registryFolder);
 const registryJsonPath = join(registryPath, "registry.json");
-const blockDir = join(registryPath, "registry", styleName, "blocks", blockName);
-const componentFilePath = join(blockDir, `${blockName}.tsx`);
-const hookFilePath = join(blockDir, `use-${blockName}.ts`);
-
 if (!existsSync(registryJsonPath)) {
   console.error("Error: registry.json not found");
   process.exit(1);
 }
+
+const registry = JSON.parse(readFileSync(registryJsonPath, "utf-8"));
+registry.items = registry.items || [];
+if (registry.items.some((i) => i.name === blockName)) {
+  console.error(
+    `Error: Block "${blockName}" already exists in registry. Remove it first or choose a different name.`,
+  );
+  process.exit(1);
+}
+
+const blockDir = join(registryPath, "registry", styleName, "blocks", blockName);
+const componentFilePath = join(blockDir, `${blockName}.tsx`);
+const hookFilePath = join(blockDir, `use-${blockName}.ts`);
 
 if (existsSync(componentFilePath)) {
   cancel(`Block already exists at ${blockDir}`);
@@ -166,7 +175,6 @@ mkdirSync(blockDir, { recursive: true });
 writeFileSync(componentFilePath, blockComponentContent);
 writeFileSync(hookFilePath, blockHookContent);
 
-const registry = JSON.parse(readFileSync(registryJsonPath, "utf-8"));
 const componentPath = `registry/${styleName}/blocks/${blockName}/${blockName}.tsx`;
 const hookPath = `registry/${styleName}/blocks/${blockName}/use-${blockName}.ts`;
 
@@ -200,7 +208,6 @@ const newItem = {
   ],
 };
 
-registry.items = registry.items || [];
 registry.items.push(newItem);
 
 writeFileSync(registryJsonPath, JSON.stringify(registry, null, 2));

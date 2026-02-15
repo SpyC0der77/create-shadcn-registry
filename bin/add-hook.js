@@ -109,13 +109,22 @@ if (flags.style != null) {
 
 const registryPath = resolve(process.cwd(), registryFolder);
 const registryJsonPath = join(registryPath, "registry.json");
-const hookDir = join(registryPath, "registry", styleName, "hooks");
-const hookFilePath = join(hookDir, `${hookName}.ts`);
-
 if (!existsSync(registryJsonPath)) {
   console.error("Error: registry.json not found");
   process.exit(1);
 }
+
+const registry = JSON.parse(readFileSync(registryJsonPath, "utf-8"));
+registry.items = registry.items || [];
+if (registry.items.some((i) => i.name === hookName)) {
+  console.error(
+    `Error: Hook "${hookName}" already exists in registry. Remove it first or choose a different name.`,
+  );
+  process.exit(1);
+}
+
+const hookDir = join(registryPath, "registry", styleName, "hooks");
+const hookFilePath = join(hookDir, `${hookName}.ts`);
 
 if (existsSync(hookFilePath)) {
   cancel(`Hook already exists at ${hookFilePath}`);
@@ -132,7 +141,6 @@ const hookContent = HOOK_TEMPLATE.replace(
 mkdirSync(hookDir, { recursive: true });
 writeFileSync(hookFilePath, hookContent);
 
-const registry = JSON.parse(readFileSync(registryJsonPath, "utf-8"));
 const filePath = `registry/${styleName}/hooks/${hookName}.ts`;
 
 const DEFAULT_DEPS = [];
@@ -161,7 +169,6 @@ const newItem = {
   ],
 };
 
-registry.items = registry.items || [];
 registry.items.push(newItem);
 
 writeFileSync(registryJsonPath, JSON.stringify(registry, null, 2));
