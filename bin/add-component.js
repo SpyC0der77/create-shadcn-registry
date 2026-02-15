@@ -164,9 +164,22 @@ writeFileSync(componentFilePath, componentContent);
 const registry = JSON.parse(readFileSync(registryJsonPath, "utf-8"));
 const filePath = `registry/${styleName}/ui/${componentName}.tsx`;
 
+// Default deps for the component template (CVA + cn from utils)
+const DEFAULT_DEPS = ["class-variance-authority"];
+let dependencies = [...DEFAULT_DEPS];
+if (flags.dependencies != null) {
+  const extra = String(flags.dependencies)
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  dependencies = [...new Set([...DEFAULT_DEPS, ...extra])];
+}
+
 const newItem = {
   name: componentName,
   type: "registry:ui",
+  dependencies,
+  registryDependencies: [],
   files: [
     {
       path: filePath,

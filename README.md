@@ -131,6 +131,7 @@ npx create-shadcn-registry add-component --component-name my-component --registr
 | `--component-name` | kebab-case component name |
 | `--registry-folder` | Path to registry (default: `.`) |
 | `--style` | `new-york` or `default` |
+| `--dependencies` | Comma-separated npm packages (merged with defaults: `class-variance-authority`) |
 
 ### remove-component
 
