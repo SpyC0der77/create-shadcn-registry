@@ -11,10 +11,26 @@ import {
   log,
 } from "@clack/prompts";
 import { spawn } from "node:child_process";
+import { createServer } from "node:net";
 import { readFileSync, writeFileSync, existsSync, readdirSync } from "node:fs";
 import { resolve, join, basename, dirname } from "node:path";
 
-const REGISTRY_PORT = 3002;
+function findAvailablePort(startPort = 3000) {
+  return new Promise((resolve, reject) => {
+    const server = createServer();
+    server.once("error", (err) => {
+      if (err.code === "EADDRINUSE") {
+        findAvailablePort(startPort + 1).then(resolve).catch(reject);
+      } else {
+        reject(err);
+      }
+    });
+    server.once("listening", () => {
+      server.close(() => resolve(startPort));
+    });
+    server.listen(startPort);
+  });
+}
 
 function handleCancel(value) {
   if (isCancel(value)) {
@@ -143,13 +159,14 @@ if (!existsSync(join(registryPath, "node_modules"))) {
 
 await run(`${pm.run} registry:build`, registryPath, "Building registry...");
 
-// 2. Start registry server
+// 2. Find available port and start registry server
+const registryPort = await findAvailablePort(3000);
 const devCmd =
   pmChoice === "npm"
-    ? `npm run dev -- -p ${REGISTRY_PORT}`
+    ? `npm run dev -- -p ${registryPort}`
     : pmChoice === "pnpm"
-      ? `pnpm run dev -- -p ${REGISTRY_PORT}`
-      : `bun run dev -- -p ${REGISTRY_PORT}`;
+      ? `pnpm run dev -- -p ${registryPort}`
+      : `bun run dev -- -p ${registryPort}`;
 
 const registryProcess = spawn(devCmd, {
   cwd: registryPath,
@@ -199,7 +216,7 @@ const componentsPath = join(appPath, "components.json");
 const components = JSON.parse(readFileSync(componentsPath, "utf-8"));
 components.registries = components.registries || {};
 components.registries[`@${registryName}`] =
-  `http://localhost:${REGISTRY_PORT}/r/{name}.json`;
+  `http://localhost:${registryPort}/r/{name}.json`;
 writeFileSync(componentsPath, JSON.stringify(components, null, 2));
 
 // 6. Add registry components

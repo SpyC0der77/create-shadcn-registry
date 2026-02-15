@@ -1,5 +1,11 @@
 #!/usr/bin/env node
 
+const subcommand = process.argv[2];
+if (subcommand === "add-component") {
+  await import("./add-component.js");
+  process.exit(0);
+}
+
 import { intro, outro, text, select, isCancel, cancel } from "@clack/prompts";
 import { create } from "./create.js";
 
