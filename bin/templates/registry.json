@@ -1,0 +1,19 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "{{REGISTRY_NAME}}",
+  "homepage": "{{HOMEPAGE}}",
+  "items": [
+    {
+      "name": "button",
+      "type": "registry:ui",
+      "dependencies": ["@radix-ui/react-slot"],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "registry/{{STYLE_NAME}}/ui/button.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    }
+  ]
+}

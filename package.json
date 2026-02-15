@@ -1,0 +1,20 @@
+{
+  "name": "create-shadcn-registry",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Create shadcn registry",
+  "main": "bin/index.js",
+  "scripts": {
+    "start": "node bin/index.js",
+    "test": "node bin/test.js"
+  },
+  "bin": {
+    "create-shadcn-registry": "./bin/index.js"
+  },
+  "files": [
+    "bin"
+  ],
+  "dependencies": {
+    "@clack/prompts": "^1.0.1"
+  }
+}
