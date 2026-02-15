@@ -17,6 +17,14 @@ if (subcommand === "remove-component") {
   await import("./remove-component.js");
   process.exit(0);
 }
+if (subcommand === "remove-hook") {
+  await import("./remove-hook.js");
+  process.exit(0);
+}
+if (subcommand === "remove-block") {
+  await import("./remove-block.js");
+  process.exit(0);
+}
 if (subcommand === "create-test-app") {
   await import("./create-test-app.js");
   process.exit(0);

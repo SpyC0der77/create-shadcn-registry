@@ -102,7 +102,9 @@ Full details: [shadcn Registry Docs](https://ui.shadcn.com/docs/registry)
 | `bun run add-component` | Add a new component to an existing registry |
 | `bun run add-hook` | Add a new hook to an existing registry |
 | `bun run add-block` | Add a new block to an existing registry |
-| `bun run remove-component` | Remove a component, hook, or block from the registry |
+| `bun run remove-component` | Remove a component from the registry |
+| `bun run remove-hook` | Remove a hook from the registry |
+| `bun run remove-block` | Remove a block from the registry |
 | `bun run create-test-app` | Create a test Next.js app and add registry components |
 
 ### add-component
@@ -197,7 +199,7 @@ npx create-shadcn-registry add-block --block-name my-block --registry-folder . -
 
 ### remove-component
 
-From a registry project (or with the registry folder path), run:
+Remove a UI component from your registry:
 
 ```bash
 npx create-shadcn-registry remove-component
@@ -208,9 +210,9 @@ bun run remove-component
 You'll be prompted for:
 
 - **Registry folder** — Path to the folder containing `registry.json`
-- **Component to remove** — Select from existing components, hooks, or blocks in the registry
+- **Component to remove** — Select from existing components
 
-The command deletes the item's file(s) and updates `registry.json`.
+The command deletes the component file(s) and updates `registry.json`.
 
 Pass flags to skip prompts:
 ```bash
@@ -220,6 +222,56 @@ npx create-shadcn-registry remove-component --component button --registry-folder
 | Flag | Description |
 |------|-------------|
 | `--component` | Component name to remove |
+| `--registry-folder` | Path to registry (default: `.`) |
+
+### remove-hook
+
+Remove a hook from your registry:
+
+```bash
+npx create-shadcn-registry remove-hook
+# or
+bun run remove-hook
+```
+
+You'll be prompted for:
+
+- **Registry folder** — Path to the folder containing `registry.json`
+- **Hook to remove** — Select from existing hooks
+
+Pass flags to skip prompts:
+```bash
+npx create-shadcn-registry remove-hook --hook use-my-hook --registry-folder .
+```
+
+| Flag | Description |
+|------|-------------|
+| `--hook` | Hook name to remove |
+| `--registry-folder` | Path to registry (default: `.`) |
+
+### remove-block
+
+Remove a block from your registry:
+
+```bash
+npx create-shadcn-registry remove-block
+# or
+bun run remove-block
+```
+
+You'll be prompted for:
+
+- **Registry folder** — Path to the folder containing `registry.json`
+- **Block to remove** — Select from existing blocks
+
+Pass flags to skip prompts:
+```bash
+npx create-shadcn-registry remove-block --block my-block --registry-folder .
+```
+
+| Flag | Description |
+|------|-------------|
+| `--block` | Block name to remove |
 | `--registry-folder` | Path to registry (default: `.`) |
 
 ### create-test-app

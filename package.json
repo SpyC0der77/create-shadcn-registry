@@ -10,6 +10,8 @@
     "add-hook": "node bin/add-hook.js",
     "add-block": "node bin/add-block.js",
     "remove-component": "node bin/remove-component.js",
+    "remove-hook": "node bin/remove-hook.js",
+    "remove-block": "node bin/remove-block.js",
     "create-test-app": "node bin/create-test-app.js"
   },
   "bin": {
