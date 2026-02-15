@@ -47,6 +47,26 @@ You'll be asked for:
 
 The tool clones the template, applies your choices, and writes a ready-to-use registry.
 
+### Flags (skip prompts)
+
+Pass any flag to skip that prompt. Mix flags and prompts as needed:
+
+```bash
+# Fully automated
+npx create-shadcn-registry --registry-name my-ui --project-location ./registry --style default --homepage https://my-registry.com
+
+# Only specify some and prompt for the rest
+npx create-shadcn-registry --registry-name my-ui --style default
+```
+
+| Flag | Description |
+|------|-------------|
+| `--registry-name` | Registry identifier (e.g. `@name/component`) |
+| `--project-location` | Folder to create the registry in |
+| `--framework` | Target framework |
+| `--style` | `new-york` or `default` |
+| `--homepage` | URL where the registry will be hosted |
+
 ## Project Structure
 
 After creation, you'll have:
@@ -101,6 +121,17 @@ You'll be prompted for:
 
 The command creates an example component file and updates `registry.json`.
 
+Pass flags to skip prompts:
+```bash
+npx create-shadcn-registry add-component --component-name my-component --registry-folder . --style new-york
+```
+
+| Flag | Description |
+|------|-------------|
+| `--component-name` | kebab-case component name |
+| `--registry-folder` | Path to registry (default: `.`) |
+| `--style` | `new-york` or `default` |
+
 ### remove-component
 
 From a registry project (or with the registry folder path), run:
@@ -117,6 +148,16 @@ You'll be prompted for:
 - **Component to remove** — Select from existing components in the registry
 
 The command deletes the component file(s) and updates `registry.json`.
+
+Pass flags to skip prompts:
+```bash
+npx create-shadcn-registry remove-component --component button --registry-folder .
+```
+
+| Flag | Description |
+|------|-------------|
+| `--component` | Component name to remove |
+| `--registry-folder` | Path to registry (default: `.`) |
 
 ### create-test-app
 
@@ -136,6 +177,17 @@ bun run create-test-app
 ```
 
 You'll be prompted for the registry folder (with `registry.json`) and the target app folder (must be empty).
+
+Pass flags to skip prompts:
+```bash
+npx create-shadcn-registry create-test-app --registry-folder ./test --app-folder ./test-app --package-manager bun
+```
+
+| Flag | Description |
+|------|-------------|
+| `--registry-folder` | Path to registry |
+| `--app-folder` | Folder to create the Next app in |
+| `--package-manager` | `npm`, `pnpm`, or `bun` |
 
 ## License
 

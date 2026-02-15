@@ -11,6 +11,7 @@ import {
 import { resolve, join, dirname } from "node:path";
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
+import { parseArgs } from "./parse-args.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -77,35 +78,67 @@ function {{COMPONENT_NAME}}({
 export { {{COMPONENT_NAME}}, {{COMPONENT_NAME}}Variants }
 `;
 
+const { flags } = parseArgs();
+
 intro("add-component — Add a component to your registry");
 
-const registryFolder = await text({
-  message: "Folder containing the registry?",
-  placeholder: ".",
-  validate(value) {
-    const p = resolve(process.cwd(), value);
-    if (!existsSync(join(p, "registry.json"))) {
-      return "registry.json not found in that folder";
-    }
-  },
-});
-handleCancel(registryFolder);
+let registryFolder;
+if (flags["registry-folder"] != null) {
+  registryFolder = flags["registry-folder"];
+} else {
+  registryFolder = await text({
+    message: "Folder containing the registry?",
+    placeholder: ".",
+    validate(value) {
+      const p = resolve(process.cwd(), value);
+      if (!existsSync(join(p, "registry.json"))) {
+        return "registry.json not found in that folder";
+      }
+    },
+  });
+  handleCancel(registryFolder);
+}
 
-const componentName = await text({
-  message: "Component name (kebab-case)?",
-  placeholder: "my-component",
-  validate: validateComponentName,
-});
-handleCancel(componentName);
+let componentName;
+if (flags["component-name"] != null) {
+  componentName = flags["component-name"];
+  const err = validateComponentName(componentName);
+  if (err) {
+    console.error(`Error: ${err}`);
+    process.exit(1);
+  }
+} else {
+  componentName = await text({
+    message: "Component name (kebab-case)?",
+    placeholder: "my-component",
+    validate: validateComponentName,
+  });
+  handleCancel(componentName);
+}
 
-const styleName = await select({
-  message: "Which style?",
-  options: [
-    { value: "new-york", label: "New York" },
-    { value: "default", label: "Default" },
-  ],
-});
-handleCancel(styleName);
+let styleName;
+if (flags.style != null) {
+  styleName = flags.style;
+  if (!["new-york", "default"].includes(styleName)) {
+    console.error(`Error: --style must be "new-york" or "default"`);
+    process.exit(1);
+  }
+} else {
+  styleName = await select({
+    message: "Which style?",
+    options: [
+      { value: "new-york", label: "New York" },
+      { value: "default", label: "Default" },
+    ],
+  });
+  handleCancel(styleName);
+}
+
+const regPath = resolve(process.cwd(), registryFolder);
+if (!existsSync(join(regPath, "registry.json"))) {
+  console.error("Error: registry.json not found in that folder");
+  process.exit(1);
+}
 
 const registryPath = resolve(process.cwd(), registryFolder);
 const registryJsonPath = join(registryPath, "registry.json");

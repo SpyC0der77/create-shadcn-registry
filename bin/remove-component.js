@@ -15,6 +15,7 @@ import {
   existsSync,
   unlinkSync,
 } from "node:fs";
+import { parseArgs } from "./parse-args.js";
 
 function handleCancel(value) {
   if (isCancel(value)) {
@@ -23,19 +24,26 @@ function handleCancel(value) {
   }
 }
 
+const { flags } = parseArgs();
+
 intro("remove-component — Remove a component from your registry");
 
-const registryFolder = await text({
-  message: "Folder containing the registry?",
-  placeholder: ".",
-  validate(value) {
-    const p = resolve(process.cwd(), value);
-    if (!existsSync(join(p, "registry.json"))) {
-      return "registry.json not found in that folder";
-    }
-  },
-});
-handleCancel(registryFolder);
+let registryFolder;
+if (flags["registry-folder"] != null) {
+  registryFolder = flags["registry-folder"];
+} else {
+  registryFolder = await text({
+    message: "Folder containing the registry?",
+    placeholder: ".",
+    validate(value) {
+      const p = resolve(process.cwd(), value);
+      if (!existsSync(join(p, "registry.json"))) {
+        return "registry.json not found in that folder";
+      }
+    },
+  });
+  handleCancel(registryFolder);
+}
 
 const registryPath = resolve(process.cwd(), registryFolder);
 const registryJsonPath = join(registryPath, "registry.json");
@@ -47,14 +55,26 @@ if (items.length === 0) {
   process.exit(1);
 }
 
-const componentName = await select({
-  message: "Which component to remove?",
-  options: items.map((item) => ({
-    value: item.name,
-    label: item.name,
-  })),
-});
-handleCancel(componentName);
+let componentName;
+if (flags.component != null) {
+  componentName = flags.component;
+  const found = items.find((i) => i.name === componentName);
+  if (!found) {
+    console.error(
+      `Error: Component "${componentName}" not found. Available: ${items.map((i) => i.name).join(", ")}`,
+    );
+    process.exit(1);
+  }
+} else {
+  componentName = await select({
+    message: "Which component to remove?",
+    options: items.map((item) => ({
+      value: item.name,
+      label: item.name,
+    })),
+  });
+  handleCancel(componentName);
+}
 
 const item = items.find((i) => i.name === componentName);
 const files = item?.files || [];

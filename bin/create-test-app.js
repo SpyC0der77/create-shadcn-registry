@@ -10,6 +10,7 @@ import {
   taskLog,
   log,
 } from "@clack/prompts";
+import { parseArgs } from "./parse-args.js";
 import { spawn } from "node:child_process";
 import { createServer } from "node:net";
 import { readFileSync, writeFileSync, existsSync, readdirSync } from "node:fs";
@@ -104,47 +105,87 @@ const PM = {
   },
 };
 
+const { flags } = parseArgs();
+
 intro("create-test-app — Create a test app with your registry");
 
-const registryFolder = await text({
-  message: "Folder with the registry?",
-  placeholder: "./test",
-  validate(value) {
-    const p = resolve(process.cwd(), value);
-    if (!existsSync(join(p, "registry.json"))) {
-      return "registry.json not found in that folder";
-    }
-  },
-});
-handleCancel(registryFolder);
-
-const appFolder = await text({
-  message: "Folder to create the Next app in?",
-  placeholder: "./test-app",
-  validate(value) {
-    const p = resolve(process.cwd(), value);
-    if (existsSync(p)) {
-      try {
-        const entries = readdirSync(p);
-        if (entries.length > 0)
-          return "Folder exists and is not empty. Choose a new folder.";
-      } catch {
-        /* ignore */
+let registryFolder;
+if (flags["registry-folder"] != null) {
+  registryFolder = flags["registry-folder"];
+  const regPath = resolve(process.cwd(), registryFolder);
+  if (!existsSync(join(regPath, "registry.json"))) {
+    console.error("Error: registry.json not found in --registry-folder");
+    process.exit(1);
+  }
+} else {
+  registryFolder = await text({
+    message: "Folder with the registry?",
+    placeholder: "./test",
+    validate(value) {
+      const p = resolve(process.cwd(), value);
+      if (!existsSync(join(p, "registry.json"))) {
+        return "registry.json not found in that folder";
       }
-    }
-  },
-});
-handleCancel(appFolder);
+    },
+  });
+  handleCancel(registryFolder);
+}
 
-const pmChoice = await select({
-  message: "Package manager?",
-  options: [
-    { value: "npm", label: "npm" },
-    { value: "pnpm", label: "pnpm" },
-    { value: "bun", label: "bun" },
-  ],
-});
-handleCancel(pmChoice);
+let appFolder;
+if (flags["app-folder"] != null) {
+  appFolder = flags["app-folder"];
+  const appPath = resolve(process.cwd(), appFolder);
+  if (existsSync(appPath)) {
+    try {
+      const entries = readdirSync(appPath);
+      if (entries.length > 0) {
+        console.error(
+          "Error: --app-folder exists and is not empty. Choose a new folder.",
+        );
+        process.exit(1);
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+} else {
+  appFolder = await text({
+    message: "Folder to create the Next app in?",
+    placeholder: "./test-app",
+    validate(value) {
+      const p = resolve(process.cwd(), value);
+      if (existsSync(p)) {
+        try {
+          const entries = readdirSync(p);
+          if (entries.length > 0)
+            return "Folder exists and is not empty. Choose a new folder.";
+        } catch {
+          /* ignore */
+        }
+      }
+    },
+  });
+  handleCancel(appFolder);
+}
+
+let pmChoice;
+if (flags["package-manager"] != null) {
+  pmChoice = flags["package-manager"];
+  if (!["npm", "pnpm", "bun"].includes(pmChoice)) {
+    console.error("Error: --package-manager must be npm, pnpm, or bun");
+    process.exit(1);
+  }
+} else {
+  pmChoice = await select({
+    message: "Package manager?",
+    options: [
+      { value: "npm", label: "npm" },
+      { value: "pnpm", label: "pnpm" },
+      { value: "bun", label: "bun" },
+    ],
+  });
+  handleCancel(pmChoice);
+}
 
 const pm = PM[pmChoice];
 const registryPath = resolve(process.cwd(), registryFolder);

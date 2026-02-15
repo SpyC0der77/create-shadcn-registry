@@ -15,6 +15,7 @@ if (subcommand === "create-test-app") {
 }
 
 import { intro, outro, text, select, isCancel, cancel } from "@clack/prompts";
+import { parseArgs } from "./parse-args.js";
 import { create } from "./create.js";
 
 function handleCancel(value) {
@@ -24,72 +25,107 @@ function handleCancel(value) {
   }
 }
 
+const { flags } = parseArgs();
+
 intro("create-shadcn-registry");
 
 // ----- Registry name -----
-const registryName = await text({
-  message: "What should we call your registry?",
-  placeholder: "my-registry",
-  validate(value) {
-    if (value.length === 0) return "Registry name is required!";
-  },
-});
-handleCancel(registryName);
+let registryName;
+if (flags["registry-name"] != null) {
+  registryName = flags["registry-name"];
+} else {
+  registryName = await text({
+    message: "What should we call your registry?",
+    placeholder: "my-registry",
+    validate(value) {
+      if (value.length === 0) return "Registry name is required!";
+    },
+  });
+  handleCancel(registryName);
+}
+if (!registryName || String(registryName).length === 0) {
+  console.error("Error: Registry name is required");
+  process.exit(1);
+}
 
 // ----- Project location -----
-const projectLocation = await text({
-  message: "Where should we create the registry?",
-  placeholder: ".",
-});
-handleCancel(projectLocation);
+let projectLocation;
+if (flags["project-location"] != null) {
+  projectLocation = flags["project-location"];
+} else {
+  projectLocation = await text({
+    message: "Where should we create the registry?",
+    placeholder: ".",
+  });
+  handleCancel(projectLocation);
+}
 
 // ----- Framework -----
-const framework = await select({
-  message: "Which framework are you using?",
-  options: [
-    { value: "next", label: "Next.js" },
-    { value: "vite", label: "Vite", disabled: true, hint: "Not implemented" },
-    {
-      value: "sveltekit",
-      label: "SvelteKit",
-      disabled: true,
-      hint: "Not implemented",
-    },
-    { value: "vue", label: "Vue", disabled: true, hint: "Not implemented" },
-    {
-      value: "static",
-      label: "Static / Other",
-      disabled: true,
-      hint: "Not implemented",
-    },
-  ],
-});
-handleCancel(framework);
+let framework;
+if (flags.framework != null) {
+  framework = flags.framework;
+} else {
+  framework = await select({
+    message: "Which framework are you using?",
+    options: [
+      { value: "next", label: "Next.js" },
+      { value: "vite", label: "Vite", disabled: true, hint: "Not implemented" },
+      {
+        value: "sveltekit",
+        label: "SvelteKit",
+        disabled: true,
+        hint: "Not implemented",
+      },
+      { value: "vue", label: "Vue", disabled: true, hint: "Not implemented" },
+      {
+        value: "static",
+        label: "Static / Other",
+        disabled: true,
+        hint: "Not implemented",
+      },
+    ],
+  });
+  handleCancel(framework);
+}
 
 // ----- Style name -----
-const styleName = await select({
-  message: "What style do you want?",
-  options: [
-    { value: "new-york", label: "New York" },
-    { value: "default", label: "Default" },
-    { value: "other", label: "Other", disabled: true, hint: "Not implemented" },
-  ],
-});
-handleCancel(styleName);
+let styleName;
+if (flags.style != null) {
+  styleName = flags.style;
+} else {
+  styleName = await select({
+    message: "What style do you want?",
+    options: [
+      { value: "new-york", label: "New York" },
+      { value: "default", label: "Default" },
+      { value: "other", label: "Other", disabled: true, hint: "Not implemented" },
+    ],
+  });
+  handleCancel(styleName);
+}
+if (!["new-york", "default"].includes(styleName)) {
+  console.error(`Error: --style must be "new-york" or "default"`);
+  process.exit(1);
+}
 
 // ----- Homepage -----
-const homepage = await text({
-  message: "Where will this registry be hosted?",
-  placeholder: "https://example.com",
-});
-handleCancel(homepage);
+let homepage;
+if (flags.homepage != null) {
+  homepage = flags.homepage;
+} else {
+  homepage = await text({
+    message: "Where will this registry be hosted?",
+    placeholder: "https://example.com",
+  });
+  handleCancel(homepage);
+}
 
 await create({
-  projectLocation,
-  registryName,
-  framework,
+  projectLocation: String(projectLocation),
+  registryName: String(registryName),
+  framework: String(framework),
   styleName,
-  homepage,
+  homepage: String(homepage),
 });
 
 outro(`You're all set! Registry: ${registryName}, Style: ${styleName}`);
