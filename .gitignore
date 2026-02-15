@@ -1,3 +1,5 @@
 bun.lockb
 test/
 node_modules/
+test-app/
+bun.lock

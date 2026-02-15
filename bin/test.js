@@ -7,9 +7,10 @@ import {
   select,
   isCancel,
   cancel,
-  spinner,
+  taskLog,
+  log,
 } from "@clack/prompts";
-import { execSync, spawn } from "node:child_process";
+import { spawn } from "node:child_process";
 import { readFileSync, writeFileSync, existsSync, readdirSync } from "node:fs";
 import { resolve, join, basename, dirname } from "node:path";
 
@@ -22,37 +23,65 @@ function handleCancel(value) {
   }
 }
 
-function run(cmd, cwd, description) {
-  const s = spinner();
-  s.start(description);
-  try {
-    execSync(cmd, { cwd, stdio: "inherit", shell: true });
-    s.stop(description + " — done");
-  } catch (error) {
-    s.stop(description + " — failed");
-    throw error;
-  }
+function streamToTaskLog(stream, taskLogInstance) {
+  let buffer = "";
+  stream.on("data", (data) => {
+    buffer += data.toString();
+    const lines = buffer.split("\n");
+    buffer = lines.pop() ?? "";
+    for (const line of lines) {
+      if (line.trim()) taskLogInstance.message(line, { raw: true });
+    }
+  });
+  stream.on("end", () => {
+    if (buffer.trim()) taskLogInstance.message(buffer.trim(), { raw: true });
+  });
+}
+
+async function run(cmd, cwd, description) {
+  const taskLogInstance = taskLog({ title: description });
+  const child = spawn(cmd, {
+    cwd,
+    shell: true,
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+
+  streamToTaskLog(child.stdout, taskLogInstance);
+  streamToTaskLog(child.stderr, taskLogInstance);
+
+  return new Promise((resolve, reject) => {
+    child.on("close", (code) => {
+      if (code === 0) {
+        taskLogInstance.success("Done!", { showLog: true });
+        resolve();
+      } else {
+        taskLogInstance.error("Failed!", { showLog: true });
+        reject(new Error(`Command failed with exit code ${code}`));
+      }
+    });
+  });
 }
 
 // Use npm for create-next-app to avoid Windows + Bun filesystem issues
+// npx --yes to auto-install create-next-app without "Ok to proceed?" prompt
 const PM = {
   npm: {
     create: (dir) =>
-      `npx create-next-app@latest ${dir} --yes --ts --tailwind --eslint --app --use-npm`,
+      `npx --yes create-next-app@latest ${dir} --yes --ts --tailwind --eslint --app --use-npm`,
     install: "npm install",
     run: "npm run",
     shadcn: "npx shadcn@latest",
   },
   pnpm: {
     create: (dir) =>
-      `npx create-next-app@latest ${dir} --yes --ts --tailwind --eslint --app --use-pnpm`,
+      `npx --yes create-next-app@latest ${dir} --yes --ts --tailwind --eslint --app --use-pnpm`,
     install: "pnpm install",
     run: "pnpm run",
     shadcn: "pnpm dlx shadcn@latest",
   },
   bun: {
     create: (dir) =>
-      `npx create-next-app@latest ${dir} --yes --ts --tailwind --eslint --app --use-npm`,
+      `npx --yes create-next-app@latest ${dir} --yes --ts --tailwind --eslint --app --use-npm`,
     install: "bun install",
     run: "bun run",
     shadcn: "bunx shadcn@latest",
@@ -75,7 +104,7 @@ handleCancel(registryFolder);
 
 const appFolder = await text({
   message: "Folder to create the Next app in?",
-  placeholder: "./test-e2e-app",
+  placeholder: "./test-app",
   validate(value) {
     const p = resolve(process.cwd(), value);
     if (existsSync(p)) {
@@ -109,10 +138,10 @@ const appParent = dirname(appPath);
 
 // 1. Registry preparation
 if (!existsSync(join(registryPath, "node_modules"))) {
-  run(pm.install, registryPath, "Installing registry dependencies...");
+  await run(pm.install, registryPath, "Installing registry dependencies...");
 }
 
-run(`${pm.run} registry:build`, registryPath, "Building registry...");
+await run(`${pm.run} registry:build`, registryPath, "Building registry...");
 
 // 2. Start registry server
 const devCmd =
@@ -124,25 +153,42 @@ const devCmd =
 
 const registryProcess = spawn(devCmd, {
   cwd: registryPath,
-  stdio: "inherit",
+  stdio: ["ignore", "pipe", "pipe"],
   detached: true,
   shell: true,
 });
 registryProcess.unref();
 
+function streamToLog(stream) {
+  let buffer = "";
+  stream.on("data", (data) => {
+    buffer += data.toString();
+    const lines = buffer.split("\n");
+    buffer = lines.pop() ?? "";
+    for (const line of lines) {
+      if (line.trim()) log.message(line);
+    }
+  });
+  stream.on("end", () => {
+    if (buffer.trim()) log.message(buffer.trim());
+  });
+}
+streamToLog(registryProcess.stdout);
+streamToLog(registryProcess.stderr);
+
 // Wait for server to be ready
 await new Promise((resolveWait) => setTimeout(resolveWait, 5000));
 
 // 3. Create Next app (uses npm for create-next-app to avoid Windows + Bun issues)
-run(pm.create(appName), appParent, "Creating Next.js app...");
+await run(pm.create(appName), appParent, "Creating Next.js app...");
 
 // Convert to bun if selected (create-next-app uses npm to avoid Windows + Bun issues)
 if (pmChoice === "bun") {
-  run(pm.install, appPath, "Installing with bun...");
+  await run(pm.install, appPath, "Installing with bun...");
 }
 
 // 4. Init shadcn
-run(`${pm.shadcn} init -y -d`, appPath, "Initializing shadcn...");
+await run(`${pm.shadcn} init -y -d`, appPath, "Initializing shadcn...");
 
 // 5. Configure registry
 const registryJson = JSON.parse(
@@ -160,13 +206,22 @@ writeFileSync(componentsPath, JSON.stringify(components, null, 2));
 const componentNames = registryJson.items.map((item) => item.name);
 if (componentNames.length > 0) {
   const addArgs = componentNames.map((n) => `@${registryName}/${n}`).join(" ");
-  run(
+  await run(
     `${pm.shadcn} add ${addArgs}`,
     appPath,
     `Adding registry components: ${componentNames.join(", ")}...`,
   );
 }
 
-outro(
-  `Done! Registry running at http://localhost:${REGISTRY_PORT}. App created at ${appPath}. Stop the registry with Ctrl+C or by closing the terminal.`,
-);
+// 7. Stop registry server
+try {
+  if (process.platform === "win32") {
+    registryProcess.kill("SIGTERM");
+  } else {
+    process.kill(-registryProcess.pid, "SIGTERM");
+  }
+} catch {
+  /* Process may have already exited */
+}
+
+outro(`Done! App created at ${appPath}.`);
