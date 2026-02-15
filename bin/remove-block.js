@@ -92,7 +92,7 @@ for (const file of files) {
   }
 }
 
-// Remove empty block directory (derive path from first file: registry/<style>/blocks/<name>/)
+// Recursively delete block directory and all contents (derive path from first file: registry/<style>/blocks/<name>/)
 const firstFile = files[0];
 if (firstFile?.path) {
   const dir = join(registryPath, dirname(firstFile.path));
