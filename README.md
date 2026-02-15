@@ -117,6 +117,8 @@ bun test
 
 You'll be prompted for the registry folder (with `registry.json`) and the target app folder (must be empty).
 
+Testing actions real quick (ignore this)
+
 ## License
 
 MIT
