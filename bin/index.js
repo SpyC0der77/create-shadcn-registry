@@ -5,6 +5,10 @@ if (subcommand === "add-component") {
   await import("./add-component.js");
   process.exit(0);
 }
+if (subcommand === "remove-component") {
+  await import("./remove-component.js");
+  process.exit(0);
+}
 
 import { intro, outro, text, select, isCancel, cancel } from "@clack/prompts";
 import { create } from "./create.js";

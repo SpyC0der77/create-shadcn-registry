@@ -80,6 +80,7 @@ Full details: [shadcn Registry Docs](https://ui.shadcn.com/docs/registry)
 |---------|-------------|
 | `bun start` | Run the create-shadcn-registry CLI |
 | `bun run add-component` | Add a new component to an existing registry |
+| `bun run remove-component` | Remove a component from the registry |
 | `bun test` | Run E2E test (creates Next app, adds registry components) |
 
 ### add-component
@@ -99,6 +100,23 @@ You'll be prompted for:
 - **Style** — New York or Default
 
 The command creates an example component file and updates `registry.json`.
+
+### remove-component
+
+From a registry project (or with the registry folder path), run:
+
+```bash
+npx create-shadcn-registry remove-component
+# or
+bun run remove-component
+```
+
+You'll be prompted for:
+
+- **Registry folder** — Path to the folder containing `registry.json`
+- **Component to remove** — Select from existing components in the registry
+
+The command deletes the component file(s) and updates `registry.json`.
 
 ## Test
 
