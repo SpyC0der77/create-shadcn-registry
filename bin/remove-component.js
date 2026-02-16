@@ -16,6 +16,7 @@ import {
   unlinkSync,
 } from "node:fs";
 import { parseArgs } from "./parse-args.js";
+import { writeRegistryExports } from "./generate-registry-exports.js";
 
 function handleCancel(value) {
   if (isCancel(value)) {
@@ -95,5 +96,6 @@ for (const file of files) {
 
 registry.items = items.filter((i) => i.name !== componentName);
 writeFileSync(registryJsonPath, JSON.stringify(registry, null, 2));
+writeRegistryExports(registryPath);
 
 outro(`Removed ${componentName}. Run \`registry:build\` to rebuild.`);
