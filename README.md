@@ -41,7 +41,6 @@ You'll be asked for:
 |--------|-------------|---------|
 | Registry name | Identifier for your registry (used as `@name/component`) | `my-ui` |
 | Project location | Folder to create the registry in | `.` or `./my-registry` |
-| Framework | Target framework (Next.js supported) | Next.js |
 | Style | Shadcn/UI style variant (Only ShadCN/ui defaults supported) | New York or Default |
 | Homepage | URL where the registry will be hosted | `https://example.com` |
 
@@ -63,7 +62,6 @@ npx create-shadcn-registry --registry-name my-ui --style default
 |------|-------------|
 | `--registry-name` | Registry identifier (e.g. `@name/component`) |
 | `--project-location` | Folder to create the registry in |
-| `--framework` | Target framework |
 | `--style` | `new-york` or `default` |
 | `--homepage` | URL where the registry will be hosted |
 

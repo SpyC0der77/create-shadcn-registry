@@ -19,7 +19,6 @@ COMMANDS (run from registry folder or pass --registry-folder)
 OPTIONS (scaffolding — when run without a command)
   --registry-name    Registry identifier (e.g. @name/component)
   --project-location Where to create the registry
-  --framework        Target framework
   --style            new-york | default
   --homepage         URL where the registry will be hosted
 
@@ -112,34 +111,6 @@ if (flags["project-location"] != null) {
   handleCancel(projectLocation);
 }
 
-// ----- Framework -----
-let framework;
-if (flags.framework != null) {
-  framework = flags.framework;
-} else {
-  framework = await select({
-    message: "Which framework are you using?",
-    options: [
-      { value: "next", label: "Next.js" },
-      { value: "vite", label: "Vite", disabled: true, hint: "Not implemented" },
-      {
-        value: "sveltekit",
-        label: "SvelteKit",
-        disabled: true,
-        hint: "Not implemented",
-      },
-      { value: "vue", label: "Vue", disabled: true, hint: "Not implemented" },
-      {
-        value: "static",
-        label: "Static / Other",
-        disabled: true,
-        hint: "Not implemented",
-      },
-    ],
-  });
-  handleCancel(framework);
-}
-
 // ----- Style name -----
 let styleName;
 if (flags.style != null) {
@@ -175,7 +146,6 @@ if (flags.homepage != null) {
 await create({
   projectLocation: String(projectLocation),
   registryName: String(registryName),
-  framework: String(framework),
   styleName,
   homepage: String(homepage),
 });

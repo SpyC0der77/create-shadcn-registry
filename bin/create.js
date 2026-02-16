@@ -11,7 +11,6 @@ const REGISTRY_TEMPLATE_URL =
 export async function create({
   projectLocation,
   registryName,
-  framework,
   styleName,
   homepage,
 }) {
@@ -52,5 +51,5 @@ export async function create({
   const pageContent = readFileSync(pageTemplatePath, "utf-8");
   writeFileSync(appPagePath, pageContent);
 
-  return { targetPath, registryName, framework, styleName, homepage };
+  return { targetPath, registryName, styleName, homepage };
 }
