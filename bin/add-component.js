@@ -9,7 +9,14 @@ import {
   cancel,
 } from "@clack/prompts";
 import { resolve, join, dirname } from "node:path";
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
+import {
+  readFileSync,
+  writeFileSync,
+  existsSync,
+  mkdirSync,
+  unlinkSync,
+  rmdirSync,
+} from "node:fs";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "./parse-args.js";
 import { writeRegistryExports } from "./generate-registry-exports.js";
@@ -202,6 +209,8 @@ const newItem = {
 registry.items.push(newItem);
 writeFileSync(registryJsonPath, JSON.stringify(registry, null, 2));
 
+const componentDirExisted = existsSync(componentDir);
+
 try {
   const pascalName = toPascalCase(componentName);
   const slotName = componentName;
@@ -213,6 +222,12 @@ try {
   writeFileSync(componentFilePath, componentContent);
   writeRegistryExports(registryPath);
 } catch (err) {
+  if (existsSync(componentFilePath)) unlinkSync(componentFilePath);
+  try {
+    if (!componentDirExisted && existsSync(componentDir)) rmdirSync(componentDir);
+  } catch {
+    /* dir may not be empty or already removed */
+  }
   registry.items = registry.items.filter((i) => i.name !== componentName);
   writeFileSync(registryJsonPath, JSON.stringify(registry, null, 2));
   throw err;

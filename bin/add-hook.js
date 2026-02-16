@@ -9,7 +9,14 @@ import {
   cancel,
 } from "@clack/prompts";
 import { resolve, join } from "node:path";
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
+import {
+  readFileSync,
+  writeFileSync,
+  existsSync,
+  mkdirSync,
+  unlinkSync,
+  rmdirSync,
+} from "node:fs";
 import { parseArgs } from "./parse-args.js";
 
 function handleCancel(value) {
@@ -162,6 +169,8 @@ const newItem = {
 registry.items.push(newItem);
 writeFileSync(registryJsonPath, JSON.stringify(registry, null, 2));
 
+const hookDirExisted = existsSync(hookDir);
+
 try {
   const hookFunctionName = toHookFunctionName(hookName);
   const hookContent = HOOK_TEMPLATE.replace(
@@ -171,6 +180,12 @@ try {
   mkdirSync(hookDir, { recursive: true });
   writeFileSync(hookFilePath, hookContent);
 } catch (err) {
+  if (existsSync(hookFilePath)) unlinkSync(hookFilePath);
+  try {
+    if (!hookDirExisted && existsSync(hookDir)) rmdirSync(hookDir);
+  } catch {
+    /* dir may not be empty or already removed */
+  }
   registry.items = registry.items.filter((i) => i.name !== hookName);
   writeFileSync(registryJsonPath, JSON.stringify(registry, null, 2));
   throw err;
