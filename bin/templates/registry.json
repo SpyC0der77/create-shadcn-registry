@@ -4,13 +4,13 @@
   "homepage": "{{HOMEPAGE}}",
   "items": [
     {
-      "name": "button",
+      "name": "example",
       "type": "registry:ui",
-      "dependencies": ["@radix-ui/react-slot"],
+      "dependencies": [],
       "registryDependencies": [],
       "files": [
         {
-          "path": "registry/{{STYLE_NAME}}/ui/button.tsx",
+          "path": "registry/{{STYLE_NAME}}/ui/example.tsx",
           "type": "registry:ui"
         }
       ]

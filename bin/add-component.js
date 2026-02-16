@@ -12,6 +12,7 @@ import { resolve, join, dirname } from "node:path";
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "./parse-args.js";
+import { writeRegistryExports } from "./generate-registry-exports.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -54,9 +55,16 @@ const {{COMPONENT_NAME}}Variants = cva(
           "border-transparent bg-destructive text-destructive-foreground shadow hover:bg-destructive/80",
         outline: "text-foreground border border-input bg-background",
       },
+      size: {
+        default: "h-9 px-4 py-2",
+        sm: "h-8 rounded-md px-3",
+        lg: "h-10 rounded-md px-8",
+        icon: "size-9",
+      },
     },
     defaultVariants: {
       variant: "default",
+      size: "default",
     },
   }
 )
@@ -64,14 +72,18 @@ const {{COMPONENT_NAME}}Variants = cva(
 function {{COMPONENT_NAME}}({
   className,
   variant,
+  size,
   ...props
-}: React.ComponentProps<"div"> & VariantProps<typeof {{COMPONENT_NAME}}Variants>) {
+}: React.ComponentProps<"button"> &
+  VariantProps<typeof {{COMPONENT_NAME}}Variants>) {
   return (
-    <div
+    <button
       data-slot="{{SLOT_NAME}}"
-      className={cn({{COMPONENT_NAME}}Variants({ variant, className }))}
+      className={cn({{COMPONENT_NAME}}Variants({ variant, size, className }))}
       {...props}
-    />
+    >
+      Customize me
+    </button>
   )
 }
 
@@ -199,6 +211,7 @@ try {
   ).replace(/\{\{SLOT_NAME\}\}/g, slotName);
   mkdirSync(componentDir, { recursive: true });
   writeFileSync(componentFilePath, componentContent);
+  writeRegistryExports(registryPath);
 } catch (err) {
   registry.items = registry.items.filter((i) => i.name !== componentName);
   writeFileSync(registryJsonPath, JSON.stringify(registry, null, 2));

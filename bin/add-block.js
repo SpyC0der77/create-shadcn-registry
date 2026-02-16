@@ -18,6 +18,7 @@ import {
   rmdirSync,
 } from "node:fs";
 import { parseArgs } from "./parse-args.js";
+import { writeRegistryExports } from "./generate-registry-exports.js";
 
 function handleCancel(value) {
   if (isCancel(value)) {
@@ -218,6 +219,7 @@ try {
   mkdirSync(blockDir, { recursive: true });
   writeFileSync(componentFilePath, blockComponentContent);
   writeFileSync(hookFilePath, blockHookContent);
+  writeRegistryExports(registryPath);
 } catch (err) {
   if (existsSync(componentFilePath)) unlinkSync(componentFilePath);
   if (existsSync(hookFilePath)) unlinkSync(hookFilePath);

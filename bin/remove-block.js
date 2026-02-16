@@ -17,6 +17,7 @@ import {
   rmSync,
 } from "node:fs";
 import { parseArgs } from "./parse-args.js";
+import { writeRegistryExports } from "./generate-registry-exports.js";
 
 function handleCancel(value) {
   if (isCancel(value)) {
@@ -107,5 +108,6 @@ if (firstFile?.path) {
 
 registry.items = items.filter((i) => i.name !== blockName);
 writeFileSync(registryJsonPath, JSON.stringify(registry, null, 2));
+writeRegistryExports(registryPath);
 
 outro(`Removed ${blockName}. Run \`registry:build\` to rebuild.`);

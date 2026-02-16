@@ -2,6 +2,7 @@ import { execSync } from "node:child_process";
 import { resolve, join, dirname } from "node:path";
 import { readFileSync, writeFileSync, renameSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
+import { writeRegistryExports } from "./generate-registry-exports.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REGISTRY_TEMPLATE_URL =
@@ -44,10 +45,11 @@ export async function create({
 
   writeFileSync(registryJsonPath, registryContent);
 
+  writeRegistryExports(targetPath);
+
   const pageTemplatePath = join(__dirname, "templates", "page.tsx");
   const appPagePath = join(targetPath, "app", "page.tsx");
-  let pageContent = readFileSync(pageTemplatePath, "utf-8");
-  pageContent = pageContent.replace(/\{\{STYLE_NAME\}\}/g, styleName);
+  const pageContent = readFileSync(pageTemplatePath, "utf-8");
   writeFileSync(appPagePath, pageContent);
 
   return { targetPath, registryName, framework, styleName, homepage };

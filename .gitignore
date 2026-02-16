@@ -3,3 +3,5 @@ test/
 node_modules/
 test-app/
 bun.lock
+.DS_Store
+bin/.DS_Store

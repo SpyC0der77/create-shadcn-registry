@@ -8,7 +8,7 @@ USAGE
   create-shadcn-registry --help | -h
 
 COMMANDS (run from registry folder or pass --registry-folder)
-  add-component    Add a new component
+  add-component    Add a new component (button-style starter)
   add-hook         Add a new hook
   add-block        Add a new block
   remove-component Remove a component
