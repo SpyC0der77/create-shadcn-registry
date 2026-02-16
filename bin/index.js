@@ -179,4 +179,33 @@ await create({
   homepage: String(homepage),
 });
 
+// Suggest to install dependencies
+const dependencies = await select({
+  message: "Do you want to install dependencies?",
+  options: [
+    { value: "yes", label: "Yes" },
+    { value: "no", label: "No" },
+  ],
+});
+handleCancel(dependencies);
+
+// Ask for package manager
+let packageManager;
+if (flags["package-manager"] != null) {
+  packageManager = flags["package-manager"];
+} else {
+  packageManager = await select({
+    message: "Which package manager do you want to use?",
+    options: [
+      { value: "npm", label: "npm" },
+      { value: "pnpm", label: "pnpm" },
+      { value: "bun", label: "bun" },
+    ],
+  });
+  handleCancel(packageManager);
+}
+
+if (dependencies === "yes") {
+  await run(`${packageManager} install`, projectLocation, "Installing dependencies...");
+}
 outro(`You're all set! Registry: ${registryName}, Style: ${styleName}`);
