@@ -1,7 +1,6 @@
 import type React from "react";
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import Link from "next/link";
+import registryData from "@/registry.json";
 import * as Registry from "@/registry/exports";
 
 type RegistryItem = {
@@ -10,6 +9,10 @@ type RegistryItem = {
 };
 
 type SearchParams = Record<string, string | string[] | undefined>;
+type RegistryManifest = { items?: RegistryItem[] };
+
+const isDevelopment = process.env.NODE_ENV !== "production";
+const bundledRegistry = registryData as RegistryManifest;
 
 function toPascalCase(str: string) {
   return str
@@ -40,13 +43,12 @@ export default async function Home({
 }: {
   searchParams?: SearchParams | Promise<SearchParams>;
 }) {
-  const registryPath = join(process.cwd(), "registry.json");
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const rawView = Array.isArray(resolvedSearchParams?.view)
     ? resolvedSearchParams?.view[0]
     : resolvedSearchParams?.view;
   const view = rawView === "list" ? "list" : "bento";
-  let registry: { items?: RegistryItem[] };
+  let registry = bundledRegistry;
   const hideScrollbarStyles = `
     html {
       scrollbar-width: none;
@@ -57,29 +59,34 @@ export default async function Home({
     }
   `;
 
-  try {
-    registry = JSON.parse(readFileSync(registryPath, "utf-8"));
-  } catch {
-    return (
-      <div
-        className="min-h-svh bg-white"
-        style={{ paddingRight: "calc(100vw - 100%)" }}
-      >
-        <style>{hideScrollbarStyles}</style>
-        <div className="mx-auto flex w-full max-w-4xl flex-col gap-8 px-4 py-10 sm:px-6">
-          <header className="rounded-2xl border border-zinc-300 bg-white p-8">
-            <h1 className="text-3xl font-semibold tracking-tight text-zinc-900 sm:text-4xl">
-              Custom Registry
-            </h1>
-            <p className="mt-2 text-sm text-zinc-600">registry.json not found.</p>
-          </header>
-          <p className="rounded-2xl border border-dashed border-zinc-300 bg-white p-6 text-sm text-zinc-600">
-            Add a <code className="font-mono text-zinc-900">registry.json</code>{" "}
-            file to render your component previews in this page.
-          </p>
+  if (isDevelopment) {
+    try {
+      const { readFileSync } = await import("node:fs");
+      const { join } = await import("node:path");
+      const registryPath = join(process.cwd(), "registry.json");
+      registry = JSON.parse(readFileSync(registryPath, "utf-8"));
+    } catch {
+      return (
+        <div
+          className="min-h-svh bg-white"
+          style={{ paddingRight: "calc(100vw - 100%)" }}
+        >
+          <style>{hideScrollbarStyles}</style>
+          <div className="mx-auto flex w-full max-w-4xl flex-col gap-8 px-4 py-10 sm:px-6">
+            <header className="rounded-2xl border border-zinc-300 bg-white p-8">
+              <h1 className="text-3xl font-semibold tracking-tight text-zinc-900 sm:text-4xl">
+                Custom Registry
+              </h1>
+              <p className="mt-2 text-sm text-zinc-600">registry.json not found.</p>
+            </header>
+            <p className="rounded-2xl border border-dashed border-zinc-300 bg-white p-6 text-sm text-zinc-600">
+              Add a <code className="font-mono text-zinc-900">registry.json</code>{" "}
+              file to render your component previews in this page.
+            </p>
+          </div>
         </div>
-      </div>
-    );
+      );
+    }
   }
 
   const items = registry.items || [];
