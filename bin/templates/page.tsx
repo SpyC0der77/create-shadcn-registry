@@ -9,7 +9,7 @@ type RegistryItem = {
 };
 
 type SearchParams = Record<string, string | string[] | undefined>;
-type RegistryManifest = { items?: RegistryItem[] };
+type RegistryManifest = { name?: string; items?: RegistryItem[] };
 
 const isDevelopment = process.env.NODE_ENV !== "production";
 const bundledRegistry = registryData as RegistryManifest;
@@ -49,6 +49,10 @@ export default async function Home({
     : resolvedSearchParams?.view;
   const view = rawView === "list" ? "list" : "bento";
   let registry = bundledRegistry;
+  const fallbackRegistryName =
+    typeof bundledRegistry.name === "string" && bundledRegistry.name.trim() !== ""
+      ? bundledRegistry.name
+      : "Custom";
   const hideScrollbarStyles = `
     html {
       scrollbar-width: none;
@@ -75,7 +79,7 @@ export default async function Home({
           <div className="mx-auto flex w-full max-w-4xl flex-col gap-8 px-4 py-10 sm:px-6">
             <header className="rounded-2xl border border-zinc-300 bg-white p-8">
               <h1 className="text-3xl font-semibold tracking-tight text-zinc-900 sm:text-4xl">
-                Custom Registry
+                {fallbackRegistryName} ShadCN/ui Registry
               </h1>
               <p className="mt-2 text-sm text-zinc-600">registry.json not found.</p>
             </header>
@@ -90,6 +94,10 @@ export default async function Home({
   }
 
   const items = registry.items || [];
+  const registryName =
+    typeof registry.name === "string" && registry.name.trim() !== ""
+      ? registry.name
+      : "Custom";
   const components = items.filter(
     (i) => i.type === "registry:ui" || i.type === "registry:block"
   );
@@ -116,7 +124,7 @@ export default async function Home({
           <div className="mt-3 flex flex-wrap items-end justify-between gap-5">
             <div>
               <h1 className="text-3xl font-semibold tracking-tight text-zinc-900 sm:text-4xl">
-                Custom Registry
+                {registryName} ShadCN/ui Registry
               </h1>
               <p className="mt-2 max-w-2xl text-sm text-zinc-600">
                 Preview your shadcn registry components in two layouts: a bold
@@ -159,9 +167,6 @@ export default async function Home({
             </span>
             <span className="rounded-full border border-zinc-300 bg-white px-3 py-1 text-zinc-700">
               {hooks.length} Hooks
-            </span>
-            <span className="rounded-full border border-zinc-300 bg-white px-3 py-1 text-zinc-700">
-              View: {view === "bento" ? "Bento Grid" : "List"}
             </span>
           </div>
         </header>
