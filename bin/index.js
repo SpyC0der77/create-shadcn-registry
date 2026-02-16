@@ -1,6 +1,41 @@
 #!/usr/bin/env node
 
-const subcommand = process.argv[2];
+const HELP = `
+create-shadcn-registry — Scaffold a custom shadcn/ui component registry
+
+USAGE
+  create-shadcn-registry [command] [options]
+  create-shadcn-registry --help | -h
+
+COMMANDS (run from registry folder or pass --registry-folder)
+  add-component    Add a new component
+  add-hook         Add a new hook
+  add-block        Add a new block
+  remove-component Remove a component
+  remove-hook      Remove a hook
+  remove-block     Remove a block
+  create-test-app  Create a test Next.js app with registry components
+
+OPTIONS (scaffolding — when run without a command)
+  --registry-name    Registry identifier (e.g. @name/component)
+  --project-location Where to create the registry
+  --framework        Target framework
+  --style            new-york | default
+  --homepage         URL where the registry will be hosted
+
+EXAMPLES
+  npx create-shadcn-registry
+  npx create-shadcn-registry --registry-name my-ui --style default
+  npx create-shadcn-registry add-component --component-name my-button --style new-york
+`;
+
+const arg = process.argv[2];
+if (arg === "help" || arg === "--help" || arg === "-h") {
+  console.log(HELP.trim());
+  process.exit(0);
+}
+
+const subcommand = arg;
 if (subcommand === "add-component") {
   await import("./add-component.js");
   process.exit(0);
