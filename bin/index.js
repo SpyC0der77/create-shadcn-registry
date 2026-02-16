@@ -68,6 +68,7 @@ if (subcommand === "create-test-app") {
 import { intro, outro, text, select, isCancel, cancel } from "@clack/prompts";
 import { parseArgs } from "./parse-args.js";
 import { create } from "./create.js";
+import { run } from "./run.js";
 
 function handleCancel(value) {
   if (isCancel(value)) {

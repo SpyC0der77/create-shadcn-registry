@@ -7,7 +7,6 @@ import {
   select,
   isCancel,
   cancel,
-  taskLog,
   log,
 } from "@clack/prompts";
 import { parseArgs } from "./parse-args.js";
@@ -40,44 +39,7 @@ function handleCancel(value) {
   }
 }
 
-function streamToTaskLog(stream, taskLogInstance) {
-  let buffer = "";
-  stream.on("data", (data) => {
-    buffer += data.toString();
-    const lines = buffer.split("\n");
-    buffer = lines.pop() ?? "";
-    for (const line of lines) {
-      if (line.trim()) taskLogInstance.message(line, { raw: true });
-    }
-  });
-  stream.on("end", () => {
-    if (buffer.trim()) taskLogInstance.message(buffer.trim(), { raw: true });
-  });
-}
-
-async function run(cmd, cwd, description) {
-  const taskLogInstance = taskLog({ title: description });
-  const child = spawn(cmd, {
-    cwd,
-    shell: true,
-    stdio: ["ignore", "pipe", "pipe"],
-  });
-
-  streamToTaskLog(child.stdout, taskLogInstance);
-  streamToTaskLog(child.stderr, taskLogInstance);
-
-  return new Promise((resolve, reject) => {
-    child.on("close", (code) => {
-      if (code === 0) {
-        taskLogInstance.success("Done!", { showLog: true });
-        resolve();
-      } else {
-        taskLogInstance.error("Failed!", { showLog: true });
-        reject(new Error(`Command failed with exit code ${code}`));
-      }
-    });
-  });
-}
+import { run } from "./run.js";
 
 // Use npm for create-next-app to avoid Windows + Bun filesystem issues
 // npx --yes to auto-install create-next-app without "Ok to proceed?" prompt
