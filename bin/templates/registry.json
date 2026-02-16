@@ -6,7 +6,7 @@
     {
       "name": "example",
       "type": "registry:ui",
-      "dependencies": ["@radix-ui/react-slot"],
+      "dependencies": [],
       "registryDependencies": [],
       "files": [
         {
