@@ -1,7 +1,10 @@
 bun.lockb
 test/
 node_modules/
-test-app/
 bun.lock
 .DS_Store
 bin/.DS_Store
+
+# My Personal Tests
+next-skeletons
+test-app/

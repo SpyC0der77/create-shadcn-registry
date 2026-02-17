@@ -5,6 +5,7 @@ import {
   outro,
   text,
   select,
+  multiselect,
   isCancel,
   cancel,
   log,
@@ -225,12 +226,26 @@ writeFileSync(componentsPath, JSON.stringify(components, null, 2));
 // 6. Add registry components
 const componentNames = registryJson.items.map((item) => item.name);
 if (componentNames.length > 0) {
-  const addArgs = componentNames.map((n) => `@${registryName}/${n}`).join(" ");
-  await run(
-    `${pm.shadcn} add ${addArgs}`,
-    appPath,
-    `Adding registry components: ${componentNames.join(", ")}...`,
-  );
+  const selectedComponents = await multiselect({
+    message: "Which registry components should be added to the test app?",
+    options: componentNames.map((name) => ({ value: name, label: name })),
+    initialValues: componentNames,
+    required: false,
+  });
+  handleCancel(selectedComponents);
+
+  if (selectedComponents.length > 0) {
+    const addArgs = selectedComponents
+      .map((n) => `@${registryName}/${n}`)
+      .join(" ");
+    await run(
+      `${pm.shadcn} add ${addArgs}`,
+      appPath,
+      `Adding registry components: ${selectedComponents.join(", ")}...`,
+    );
+  } else {
+    log.message("No registry components selected; skipping shadcn add step.");
+  }
 }
 
 // 7. Stop registry server
