@@ -2,6 +2,12 @@
 
 A CLI tool that scaffolds a custom [shadcn/ui](https://ui.shadcn.com) component registry. Run your own registry to distribute custom components, hooks, and blocks to any React project via the shadcn CLI.
 
+## Terminal demo
+
+![Recorded terminal usage](docs/images/cli-demo.gif)
+
+Recorded with [VHS](https://github.com/charmbracelet/vhs). [Recording source and instructions](docs/demo/README.md).
+
 ## How It Works
 
 1. **Scaffolding** — Clones the [registry-template](https://github.com/SpyC0der77/registry-template) and customizes it with your settings.
